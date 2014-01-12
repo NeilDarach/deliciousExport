@@ -1,0 +1,38 @@
+CACHE MANIFEST
+
+NETWORK:
+../books.xml
+
+CACHE:
+importLibrary.js
+index.html
+jquery-1.4.2.min.js
+jqtouch/jqtouch/jqtouch.css
+jqtouch/jqtouch/jqtouch.js
+jqtouch/jqtouch/jqtouch.min.css
+jqtouch/jqtouch/jqtouch.min.js
+jqtouch/jqtouch/jqtouch.transitions.js
+jqtouch/themes/apple/theme.css
+jqtouch/themes/apple/theme.min.css
+jqtouch/themes/apple/img/backButton.png
+jqtouch/themes/apple/img/blueButton.png
+jqtouch/themes/apple/img/cancel.png
+jqtouch/themes/apple/img/chevron.png
+jqtouch/themes/apple/img/grayButton.png
+jqtouch/themes/apple/img/listArrowSel.png
+jqtouch/themes/apple/img/listGroup.png
+jqtouch/themes/apple/img/loading.gif
+jqtouch/themes/apple/img/on_off.png
+jqtouch/themes/apple/img/pinstripes.png
+jqtouch/themes/apple/img/selection.png
+jqtouch/themes/apple/img/thumb.png
+jqtouch/themes/apple/img/toggle.png
+jqtouch/themes/apple/img/toggleOn.png
+jqtouch/themes/apple/img/toolButton.png
+jqtouch/themes/apple/img/toolbar.png
+jqtouch/themes/apple/img/whiteButton.png
+
+FALLBACK:
+../images/ ../images/empty.png
+
+# 8

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html  manifest="library.manifest"> 
+  <head>
+    <meta charset="utf-8">
+    <link rel="apple-touch-icon" href="../images/BooksIcon.png" />
+    <link rel="apple-touch-startup-image" href="../images/BooksSplash.png" />
+    <script src="jquery-1.4.2.min.js" type="application/x-javascript" charset="utf-8"></script>
+    <script src="jqtouch/jqtouch/jqtouch.min.js" type="application/x-javascript" charset="utf-8"></script>
+    <script src="importLibrary.js" type="application/x-javascript" charset="utf-8"></script>
+    <style type="text/css">
+      .authorEntry { 
+        background-color: rgba(0,0,0,0.1);
+        } 
+      #progress {
+        -webkit-border-radius: 10px;
+        background-color: rgba(0,0,0,.7);
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        height: 160px;
+        left: 60px;
+        line-height: 70px;
+        margin: 0 auto;
+        position: absolute;
+        text-align: center;
+        top: 120px;
+        width: 200px;
+        max-width: 200px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        }
+    </style>
+    <script type="text/javascript">
+      var jQT = $.jQTouch({slideSelector: "body > * > ul li a, .slide",
+                           useFastTouch: false});
+      var db;
+
+      function searchDatabase() {
+        $('#searchText').blur();
+        sessionStorage.searchText = $('#searchText').val();
+        $('#results li:gt(1)').remove();
+        basicBookSearch(sessionStorage.searchText,function(bookArray) {
+                                             var lastAuthor='';
+                                             var author;
+                                             for (var i=0; i < bookArray.length; i++) {
+                                               var row = bookArray[i];
+                                               if (row.forenames) {
+                                                 author = row.surname + ', ' + row.forenames;
+                                                 } else {
+                                                 author = row.surname;
+                                                 }
+                                                
+                                               if (author != lastAuthor) {
+                                                 lastAuthor = author;
+                                                 var newAuthorRow = $('#authorTemplate').clone();
+                                                 newAuthorRow.removeAttr('id');
+                                                 newAuthorRow.removeAttr('style');
+                                                 newAuthorRow.appendTo('#results');
+                                                 newAuthorRow.find('.author').text(author);
+                                                 newAuthorRow.attr('authorId',row.authorId);
+                                                 newAuthorRow.click(authorClicked);
+                                                 }
+                                               var newTitleRow = $('#titleTemplate').clone();
+                                               newTitleRow.removeAttr('id');
+                                               newTitleRow.removeAttr('style');
+                                               newTitleRow.appendTo('#results');
+                                               newTitleRow.find('.title').text(row.title);
+                                               newTitleRow.attr('titleId',row.titleId);
+                                               newTitleRow.click(titleClicked);
+                                             }; });
+        return false;
+        }
+
+
+      function showSingleAuthor(authorId) {
+        var author = sessionStorage.author;
+        $('#singleAuthorResults li:gt(1)').remove();
+        authorSearch(authorId, function(bookArray) {
+                                 var newAuthorRow = $('#singleAuthorTemplate').clone();
+                                 var author;
+                                 if (bookArray[0].forenames) {
+                                   author = bookArray[0].surname + ', ' + bookArray[0].forenames;
+                                   } else {
+                                   author = bookArray[0].surname;
+                                   }
+                                 newAuthorRow.removeAttr('id');
+                                 newAuthorRow.removeAttr('style');
+                                 newAuthorRow.appendTo('#singleAuthorResults');
+                                 newAuthorRow.find('.author').text(author);
+                                 newAuthorRow.click(function() { return false; });
+                                 for (var i=0; i < bookArray.length; i++) {
+                                   var row = bookArray[i];
+                                   var newTitleRow = $('#singleAuthorTitleTemplate').clone();
+                                   newTitleRow.removeAttr('id');
+                                   newTitleRow.removeAttr('style');
+                                   newTitleRow.appendTo('#singleAuthorResults');
+                                   newTitleRow.find('.title').text(row.title);
+                                   newTitleRow.attr('titleId',row.titleId);
+                                   newTitleRow.click(titleClicked);
+                                   };
+                                 });
+        }
+
+      function showBookDetails(bookId) {
+        var title = sessionStorage.title;
+        bookFromId(bookId,function(book) {
+                               $('#bookDetails .bookAuthorEntry:gt(0)').remove();
+                               $('#bookDetails .seriesEntry:gt(0)').remove();
+                               $('#bookDetails .storyEntry:gt(0)').remove();
+                               $('#bookDetails .storyHeader:gt(0)').remove();
+                               $('#bookDetails').find('.title').text(book.title);
+                               $('#bookDetails').find('.image').attr('src','../images/' + book.img);
+                               for(var i = 0; i<book.authors.length; i++) {
+                                 var line = $('#bookAuthorTemplate').clone();
+                                 line.removeAttr('id');
+                                 line.removeAttr('style');
+                                 line.appendTo($('#bookAuthorTemplate').parent());
+                                 line.find('.author').text(book.authors[i].surname + ', ' + book.authors[i].forenames);
+                                 };
+                               if (book.series.title) {
+                                 var line = $('#seriesTemplate').clone();
+                                 line.removeAttr('id');
+                                 line.removeAttr('style');
+                                 line.appendTo($('#seriesTemplate').parent());
+                                 line.find('.series').text(book.series.title + ' ' + book.series.numberInSeries);
+                                 }
+  
+                               if (book.stories.length > 0) {
+                                 var line = $('#storyHeader').clone();
+                                 line.removeAttr('id');
+                                 line.removeAttr('style');
+                                 line.appendTo($('#storyHeader').parent());
+                                 }
+
+                               for (var i=0; i<book.stories.length; i++) {
+                                 var story = book.stories[i];
+                                 var line = $('#storyTemplate').clone();
+                                 var authorString = '';
+                                 for (var j=0; j<story.authors.length; j++) {
+                                   var author = story.authors[j]; 
+                                   authorString = authorString + ' & ';
+                                   if (author.forenames != '') { authorString = authorString + author.forenames + ' ' }
+                                   authorString = authorString + author.surname;
+                                   }
+                                 authorString = authorString.slice(3);
+                                 line.removeAttr('id');
+                                 line.removeAttr('style');
+                                 line.appendTo($('#storyTemplate').parent());
+                                 line.find('.story').text(story.title + ': ' + authorString);
+                                 } 
+                               });
+        }
+
+      function populateDatabase() {
+	alert('starting');
+        $.ajax({ type: "GET",
+                 url: "../books.xml",
+                 dataType: "xml",
+                 success: (function(xml) {alert('importing'); importXml(xml,progress); })} );
+	return false;
+        }
+
+      function addProgress() {
+        $('#settings').append('<div id="progress"><p id="progressTitle">Loading XML</p><p id="progressCount"></p></div>');
+        }
+
+      function progress(string,count) {
+        $('#progress').find('#progressTitle').text(string); 
+        $('#progress').find('#progressCount').text(count); 
+        }
+
+      function removeProgress(string) {
+        $('#progress').remove();
+        }
+
+      function dbError(transaction,error) { 
+        alert('Oops. Error was '+error.message+' (Code '+error.code+')');
+        return true; 
+        }
+
+      function authorClicked(e) {
+        sessionStorage.author = $(this).text();
+        showSingleAuthor($(this).attr('authorId'));
+        }
+
+      function titleClicked(e) {
+        sessionStorage.title = $(this).text();
+        showBookDetails($(this).attr('titleId'));
+        }
+
+      $(document).ready(function() {
+        var shortName = 'Books';
+        var version = '1.0';
+        var displayName = 'Books';
+        var maxSize = 65536;
+        /* db = openDatabase(shortName, version, displayName, maxSize);
+        db.transaction(function(transaction) {
+          transaction.executeSql('CREATE TABLE IF NOT EXISTS books ' +
+                                 '  (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, ' +
+                                 '   title TEXT NOT NULL, ' +
+                                 '   author TEXT NOT NULL);');});
+	*/	
+        sessionStorage.searchText = '';
+        $('#home').bind('pageAnimationStart', function() { $('searchText').val(sessionStorage.searchText)});
+        $('#refreshData form').submit(populateDatabase);
+        $('#home form').submit(searchDatabase);
+        });
+    </script>
+    <style type="text/css" media="screen">@import "jqtouch/jqtouch/jqtouch.min.css";</style>
+    <style type="text/css" media="screen">@import "jqtouch/themes/apple/theme.css";</style>
+  </head>
+  <body>
+    <div id="home">
+      <div class="toolbar">
+        <h1>Books</h1>
+        <a class="button slide" href="#settings">Settings</a>
+      </div>
+      <form method="post">
+        <ul>
+          <li>
+            <input type="text" placeholder="" name="searchText" id="searchText"
+                   autocapitalize="off" autocorrect="off" autocomplete="off" />
+          </li>
+        </ul>
+      </form>
+      <ul id="results">
+        <li id="authorTemplate" class="arrow authorEntry" style="display: none"><a class="author" href="#singleAuthor"></a></li>
+        <li id="titleTemplate"  class="titleEntry" style="display: none"><a  class="title" href="#bookDetails"></a></li>
+      </ul>
+    </div>
+    <div id="singleAuthor">
+      <div class="toolbar">
+        <h1 id="author">Author</h1>
+        <a class="button back" href="#">Back</a>
+      </div>
+      <ul id="singleAuthorResults">
+        <li id="singleAuthorTemplate" class="authorEntry" style="display: none"><a class="author"></a></li>
+        <li id="singleAuthorTitleTemplate"  class="titleEntry" style="display: none"><a  class="title" href="#bookDetails"></a></li>
+      </ul>
+    </div>
+    <div id="bookDetails">
+      <div class="toolbar">
+        <h1 id="title">Book</h1>
+        <a class="button back" href="#">Back</a>
+      </div>
+      <div>
+        <p>Title: <span class="title"></span></p>
+        <p style="display: none" id="bookAuthorTemplate" class="bookAuthorEntry">Author: <span class="author"></span></p>
+        <p style="display: none" id="seriesTemplate" class="seriesEntry">Series: <span class="series"></span></p>
+        <p style="display: none" id="storyHeader" class="storyHeader">Stories</p>
+        <p style="display: none" id="storyTemplate" class="storyEntry"><span class="story"></span></p>
+        <p><img class="image" src="../images/empty.png"/></p>
+      </div>
+    </div>
+    <div id="settings">
+      <div class="toolbar">
+        <h1>Settings</h1>
+        <a class="button back" href="#">Back</a>
+      </div>
+      <div id="refreshData">
+        <p>An app to load my books into local storage</p>
+        <form method="post">
+          <input type="submit" class="submit" name="submit" value="Reload Database" />
+        </form>
+      </div>
+    </div> 
+  </body>
+</html>

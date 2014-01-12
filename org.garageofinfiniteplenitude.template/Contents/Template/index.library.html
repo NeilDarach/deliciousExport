@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <meta name="media-per-column" content="9999999" />
+    <meta name="columns-per-page" content="1" />
+    <title>Library</title>
+    <style>
+        body {
+            background: white;
+        }
+
+        .arrow.left:before {
+            content: "<";
+        }
+        .arrow.right:after {
+            content: ">";
+        }
+	.cover { float: left; padding-right: 20px; }
+	.cover img { display: block }
+	.medium { margin: 20px 20px 0 0;
+			overflow: auto;
+		}
+	.feature { white-space: pre; }
+    </style>
+</head>
+<body>
+<div id="header">
+    <div id="header_main">
+        <div id="collection_info">
+           <div id="stats">
+               <div id="total">Collection Total: <span style="font-weight: bold">$totalItems</span>, Last Updated: <span style="font-weight: bold">$publishDate</span></div>
+           </div>
+        </div>
+    </div>
+</div>
+    
+<div id="content">
+    <hr />
+    <div id="media">
+        <table>
+            <tr>
+                <td>
+                    <!-- Delicious Library will take the last element with class "medium"
+                         and stamp them out with <tr> and <td> elements controlled by the
+                         media-per-column and columns-per-page <meta> elements in <head> -->
+                    <div class="medium" id="medium$uuidString">
+                        <div class="cover">$coverImage128</div>
+                        <div><a href="$amazonURL" class="title">$title</a></div>
+                        <div>$creatorsCompositeString</div>
+			<div>$seriesSingularString $numberInSeries</div>
+			<div class="feature">$featuresCompositeString</div>
+			</br>
+                    </div> <!-- End medium -->
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+</html>
